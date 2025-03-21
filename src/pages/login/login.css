@@ -1,0 +1,9 @@
+@reference "tailwindcss";
+
+.login-container {
+  @apply h-dvh flex justify-center items-center p-8;
+}
+
+#login-card, #reg-card {
+  @apply w-[24rem];
+}
