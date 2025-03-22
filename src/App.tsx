@@ -19,6 +19,22 @@ function App() {
   return (
     <ThemeProvider>
       <AuthCheck isAuth={isAuth} />
+      <div className="bg-credit text-xs fixed bottom-2 left-3 text-muted-foreground">
+        Photo by{" "}
+        <a
+          className="underline"
+          href="https://unsplash.com/@anik3t?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
+        >
+          Aniket Deole
+        </a>{" "}
+        on{" "}
+        <a
+          className="underline"
+          href="https://unsplash.com/photos/photo-of-valley-M6XC789HLe8?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
+        >
+          Unsplash
+        </a>
+      </div>
     </ThemeProvider>
   );
 }
