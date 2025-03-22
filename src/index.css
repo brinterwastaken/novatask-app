@@ -5,6 +5,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body {
+  background: url(/aniket-deole-M6XC789HLe8-unsplash.jpg) center no-repeat fixed;
+  background-size: cover;
+}
+
 :root {
   font-family: 'Inter', sans-serif;
   --radius: 0.625rem;

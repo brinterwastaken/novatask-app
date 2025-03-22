@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { RecordModel } from "pocketbase";
 import { LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import TodoList, { CreateTaskDrawer } from "@/components/todo-list";
+import Todo, { CreateTaskDrawer } from "@/components/todo-list";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
@@ -76,38 +76,36 @@ export default function Home() {
   } else {
     return (
       <div id="home">
-        <div className="home-container overflow-auto md:mt-14 md:mx-auto w-full max-w-5xl">
+        <div className="home-container mt-14 md:mx-auto w-full max-w-6xl">
           <div className="home-content bg-background/60">
             <h1 className="text-3xl">{greet(userData.name)}</h1>
             <div className="gridview">
               <GridSection
                 name="Clock"
-                className="md:col-span-3 row-span-2 text-6xl"
+                className="md:col-span-3 row-span-2 min-h-24 text-6xl flex justify-center items-center"
               >
                 {time}
               </GridSection>
-              <GridSection name="Weather" className="md:col-span-2">
+              <GridSection name="Weather" className="md:col-span-2 min-h-24">
                 Weather
               </GridSection>
-              <GridSection name="" className="md:col-span-4 py-2 px-4 flex-col">
+              <GridSection name="" className="md:col-span-4 min-h-24 py-2 px-4 flex flex-col items-center justify-center">
                 <div className="italic text-sm text-center">{quote[0]}</div>
-                <div className="text-sm self-end mr-10"> - {quote[1]}</div>
+                <div className="text-sm self-end mr-[5%]"> - {quote[1]}</div>
               </GridSection>
               <GridSection
                 name="Tasks"
-                className="md:col-span-6 row-span-5 p-4"
+                className="col-span-6 row-span-5 p-4 pt-10 flex flex-col md:flex-row gap-2 w-full md:h-full"
               >
-                <div id="todo-container" className="flex flex-col w-full">
-                  <TodoList />
-                  <CreateTaskDrawer toastFn={toast} />
-                </div>
+                <Todo />
               </GridSection>
-              <GridSection name="Schedule" className="md:col-span-3 row-span-4">
+              <GridSection name="Schedule" className="md:col-span-3 row-span-4 min-h-80">
                 Schedule
               </GridSection>
             </div>
           </div>
         </div>
+        <CreateTaskDrawer toastFn={toast} />
         <div className="bg-credit fixed bottom-2 left-3 text-muted-foreground">
           Photo by{" "}
           <a
@@ -129,7 +127,7 @@ export default function Home() {
           email={userData.email}
           avatarUrl={`http://127.0.0.1:8090/api/files/_pb_users_auth_/${userData.id}/${userData.avatar}`}
         />
-        <Toaster position="top-center" richColors/>
+        <Toaster position="top-center" richColors />
       </div>
     );
   }
@@ -146,13 +144,10 @@ function GridSection({
   return (
     <section
       data-slot="grid-section"
-      className={cn(
-        `border rounded-lg flex items-center justify-center bg-background relative`,
-        className
-      )}
+      className={cn(`border rounded-lg bg-background relative`, className)}
       {...props}
     >
-      <code className="absolute left-2 top-1 text-sm text-muted-foreground">
+      <code className="absolute left-4 top-3 text-sm text-muted-foreground">
         {name}
       </code>
       {children}

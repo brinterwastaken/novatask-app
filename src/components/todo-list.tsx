@@ -9,21 +9,148 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { Minus, Plus, X } from "lucide-react";
+import {
+  CalendarIcon,
+  Edit2,
+  Minus,
+  Plus,
+  RefreshCw,
+  Trash,
+  X,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 
+import { useEffect, useState } from "react";
 import { pb } from "@/lib/pocketbase";
 import { toast } from "sonner";
+import { RecordModel } from "pocketbase";
 
-export default function TodoList() {
-  return <>Todo</>;
+interface Task extends RecordModel {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  duration: number;
+  priority: number;
+  due: Date;
 }
 
-export function CreateTaskDrawer({toastFn}: {toastFn: typeof toast}) {
+export default function Todo() {
+  const [tasks, setTasks] = useState<{
+    todo: Task[];
+    doing: Task[];
+    done: Task[];
+  }>({
+    todo: [],
+    doing: [],
+    done: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  const getTasks = async () => {
+    setIsLoading(true);
+    const tasks = await getTaskList();
+    setTasks(tasks);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    getTasks();
+  }, []);
+
+  return (
+    <>
+      <div className="refreshbtn absolute top-2 right-2">
+        <Button
+          size="sm"
+          variant="link"
+          className="text-muted-foreground"
+          onClick={getTasks}
+        >
+          <RefreshCw className={isLoading ? "animate-spin" : ""} />
+          Refresh
+        </Button>
+      </div>
+      <TaskList title="Todo" tasks={tasks.todo} />
+      <TaskList title="Doing" tasks={tasks.doing} />
+      <TaskList title="Done" tasks={tasks.done} />
+    </>
+  );
+}
+
+function TaskList(args: { title: string; tasks: Task[] }) {
+  return (
+    <div className="flex flex-col w-full border p-2 rounded-xs">
+      <h1 className="text-center pb-1 border-b">{args.title}</h1>
+      <div className="flex flex-col gap-2 pt-2 overflow-y-auto">
+        {args.tasks.map((task) => {
+          return <TaskCard key={task.id} task={task} />;
+        })}
+        {args.title == "Todo" ? (
+          <div className="absolute left-0 bottom-0 h-12 w-full"></div>
+        ) : (
+          ""
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TaskCard(args: { task: Task }) {
+  // Create a date object for today at noon
+  const currentDate = new Date();
+  currentDate.setHours(12, 0, 0, 0);
+
+  const testDate = new Date();
+  testDate.setDate(testDate.getDate() + 3);
+  testDate.setHours(12, 0, 0, 0);
+
+  const dueDate = args.task.due ? new Date(args.task.due) : undefined;
+
+  return (
+    <div className="bg-card flex flex-col p-2 rounded-lg border">
+      <div className="flex items-start justify-between gap-2">
+        <h1>{args.task.title}</h1>
+        <div className="flex">
+          <button className="p-1 hover:bg-accent rounded-sm">
+            <Edit2 size="16" />
+          </button>
+          <button className="p-1 hover:bg-accent rounded-sm text-red-400">
+            <Trash size="16" />
+          </button>
+        </div>
+      </div>
+      <p
+        title={args.task.description}
+        className="text-muted-foreground text-xs line-clamp-2 overflow-hidden text-ellipsis"
+      >
+        {args.task.description}
+      </p>
+      {dueDate ? (
+        <div
+          className={
+            "text-xs flex items-center gap-1" +
+            (currentDate >= dueDate
+              ? " text-red-400"
+              : testDate >= dueDate
+              ? " text-yellow-400"
+              : " text-blue-400")
+          }
+        >
+          <CalendarIcon size="12" />
+          <p> Due {dueDate.toLocaleDateString()}</p>
+        </div>
+      ) : (
+        ""
+      )}
+    </div>
+  );
+}
+
+export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
   const [dueDate, setDueDate] = useState<Date>();
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -39,8 +166,8 @@ export function CreateTaskDrawer({toastFn}: {toastFn: typeof toast}) {
 
   return (
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-      <DrawerTrigger className="absolute right-4 bottom-4" asChild>
-        <Button className="rounded-3xl">
+      <DrawerTrigger className="fixed right-6 bottom-6 w-max" asChild>
+        <Button className="rounded-3xl" size="lg">
           <Plus /> Add a task
         </Button>
       </DrawerTrigger>
@@ -186,6 +313,26 @@ function handleDurationChange(
   }
 }
 
+async function getTaskList() {
+  const todotasks = await pb.collection("tasks").getList(1, 25, {
+    filter: `userid = "${pb.authStore.record?.id}" && status = "todo"`,
+    sort: "-priority",
+  });
+  const doingtasks = await pb.collection("tasks").getList(1, 25, {
+    filter: `userid = "${pb.authStore.record?.id}" && status = "doing"`,
+    sort: "-priority",
+  });
+  const donetasks = await pb.collection("tasks").getList(1, 25, {
+    filter: `userid = "${pb.authStore.record?.id}" && status = "done"`,
+    sort: "-priority",
+  });
+  return {
+    todo: todotasks.items as Task[],
+    doing: doingtasks.items as Task[],
+    done: donetasks.items as Task[],
+  };
+}
+
 async function addTask(
   title: string,
   description: string,
@@ -204,18 +351,17 @@ async function addTask(
     .collection("tasks")
     .getFirstListItem(`userid = "${pb.authStore.record?.id}"`, {
       sort: "-priority",
-    }).catch((err) => {
+    })
+    .catch((err) => {
       if (err.status == 404) {
         return {
           priority: 0,
         };
-      }
-      else {
+      } else {
         console.error(err);
         return;
       }
     });
-
 
   const data = {
     userid: pb.authStore.record?.id,
@@ -232,6 +378,6 @@ async function addTask(
   if (record) {
     return {
       status: "success",
-    }; 
+    };
   }
 }

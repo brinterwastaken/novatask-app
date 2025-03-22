@@ -10,7 +10,7 @@ export default function NavBar(info: {
   email: string;
 }) {
   return (
-    <div className="fixed top-0 left-0 w-full flex h-14 px-4 items-center justify-between bg-background/80 backdrop-blur-2xl border border-t-0 border-l-0 border-r-0">
+    <div className="fixed top-0 left-0 w-full flex h-14 px-4 items-center justify-between bg-background/80 backdrop-blur-2xl border-b">
       <Left />
       <Right name={info.name} email={info.email} avatarUrl={info.avatarUrl} />
     </div>

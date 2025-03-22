@@ -1,15 +1,13 @@
 @reference "tailwindcss";
 
 #home {
-  @apply h-dvh flex md:px-6;
-  background: url(/aniket-deole-M6XC789HLe8-unsplash.jpg) center no-repeat fixed;
-  background-size: cover;
+  @apply min-h-dvh h-full flex md:px-6 ;
 }
 
 .home-content {
-  @apply h-full md:h-auto flex flex-col gap-6 mt-14 md:mt-24 p-6 md:rounded-3xl md:dark:border md:backdrop-blur-xl backdrop-contrast-[110%]; 
+  @apply h-full max-h-max md:h-auto flex flex-col gap-6 md:my-24 p-6 md:rounded-3xl md:dark:border md:backdrop-blur-xl backdrop-contrast-[110%];
 }
 
 .home-content .gridview {
-  @apply grid h-[40rem] grid-cols-1 md:grid-cols-9 md:grid-rows-6 gap-3 grid-flow-dense;
+  @apply flex flex-col md:grid md:h-[40rem] grid-cols-1 md:grid-cols-9 md:grid-rows-6 gap-3 grid-flow-dense;
 }
