@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import {
   CalendarIcon,
   Edit2,
+  Loader2,
   Minus,
   Plus,
   RefreshCw,
@@ -158,6 +159,7 @@ export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
   const [duration, setDuration] = useState<number>(0);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Add this state for loading spinner
 
   const handleDueDateSelect = (date: Date | undefined) => {
     date?.setHours(12);
@@ -270,7 +272,9 @@ export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
           </div>
           <DrawerFooter className="mb-4">
             <Button
+              disabled={isLoading}
               onClick={() => {
+                setIsLoading(true);
                 addTask(
                   title,
                   description,
@@ -280,6 +284,7 @@ export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
                 ).then((result) => {
                   if (result?.status == "success") {
                     setDrawerOpen(false);
+                    setIsLoading(false);
                     setTitle("");
                     setDescription("");
                     setDuration(0);
@@ -288,10 +293,12 @@ export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
                     toastFn.success("Task added successfully");
                   } else {
                     toastFn.error(result?.message);
+                    setIsLoading(false);
                   }
                 });
               }}
             >
+              {isLoading ? <Loader2 className="animate-spin" /> : ""}
               Submit
             </Button>
           </DrawerFooter>
