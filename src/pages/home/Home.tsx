@@ -112,7 +112,7 @@ export default function Home() {
           email={userData.email}
           avatarUrl={`http://127.0.0.1:8090/api/files/_pb_users_auth_/${userData.id}/${userData.avatar}`}
         />
-        <Toaster position="top-center" richColors />
+        <Toaster position="top-right" offset={{ top: "5rem"}} richColors />
       </div>
     );
   }

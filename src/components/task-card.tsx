@@ -18,6 +18,7 @@ import { Task } from "@/components/todo-list";
 import { Button } from "@/components/ui/button";
 
 import "./task-card.css";
+import { pb } from "@/lib/pocketbase";
 
 export default function TaskCard(args: {
   task: Task;
@@ -80,6 +81,7 @@ export default function TaskCard(args: {
             variant="outline"
             disabled={args.task.status == "todo"}
             className="focus-visible:ring-0"
+            onClick={() => moveTask(args.task.id, args.task.status == "done" ? "doing" : "todo")}
           >
             <ChevronLeft size="24" />
           </Button>
@@ -88,6 +90,7 @@ export default function TaskCard(args: {
             variant="outline"
             disabled={args.task.status == "done"}
             className="focus-visible:ring-0"
+            onClick={() => moveTask(args.task.id, args.task.status == "todo" ? "doing" : "done")}
           >
             <ChevronRight size="24" />
           </Button>
@@ -117,4 +120,10 @@ export default function TaskCard(args: {
       </div>
     </div>
   );
+}
+
+function moveTask(taskId: string, destination: "todo" | "doing" | "done") {
+  pb.collection("tasks").update(taskId, {
+    status: destination,
+  });
 }

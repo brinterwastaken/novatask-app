@@ -20,7 +20,7 @@ import { pb } from "@/lib/pocketbase";
 import { toast } from "sonner";
 import { RecordModel } from "pocketbase";
 import TaskCard from "@/components/task-card";
-import { DeleteDialog, ViewEditDialog } from "./todo-dialogs";
+import { DeleteDialog, ViewDialog } from "./todo-dialogs";
 
 export interface Task extends RecordModel {
   id: string;
@@ -53,6 +53,40 @@ export default function Todo() {
 
   useEffect(() => {
     getTasks();
+    pb.collection("tasks").subscribe(
+      "*",
+      (e) => {
+        if (e.action == "create") {
+          toast.success(`Task created: ${e.record.title}`);
+        }
+        if (e.action == "update") {
+          toast(`Task updated: ${e.record.title}`);
+        }
+        if (e.action == "delete") {
+          toast.warning(`Task deleted: ${e.record.title}`, {
+            action: (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  undoDeleteTask(e.record as Task);
+                }}
+                className="ml-auto"
+              >
+                Undo{" "}
+              </Button>
+            ),
+          });
+        }
+        getTasks();
+      },
+      {
+        filter: `userid = "${pb.authStore.record?.id}"`,
+      }
+    );
+    return () => {
+      pb.collection("tasks").unsubscribe("*");
+    };
   }, []);
 
   return (
@@ -76,9 +110,8 @@ export default function Todo() {
 }
 
 function TaskList(args: { title: string; tasks: Task[] }) {
-  const [viewEditDialog, setViewEditDialog] = useState<{ open: boolean; task?: Task, mode: "view" | "edit" }>({
+  const [viewDialog, setViewDialog] = useState<{ open: boolean; task?: Task }>({
     open: false,
-    mode: "view",
   });
 
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -91,27 +124,22 @@ function TaskList(args: { title: string; tasks: Task[] }) {
   return (
     <div className="flex flex-col w-full border p-2 rounded-xs">
       <h1 className="text-center pb-1 border-b">{args.title}</h1>
-      <div className="flex flex-col gap-2 pt-2 overflow-y-auto">
+      <div className="flex flex-col gap-2 pt-2 overflow-y-auto pb-10">
         {args.tasks.map((task) => {
           return (
             <TaskCard
               key={task.id}
               task={task}
-              openView={() => setViewEditDialog({ open: true, task: task, mode: "view" })}
-              openEdit={() => setViewEditDialog({ open: true, task: task, mode: "edit" })}
+              openView={() => setViewDialog({ open: true, task: task })}
+              openEdit={() => {}}
               openDelete={() => setDeleteDialog({ open: true, task: task })}
             />
           );
         })}
-        {args.title == "Todo" ? (
-          <div className="absolute left-0 bottom-0 h-12 w-full"></div>
-        ) : (
-          ""
-        )}
       </div>
 
       {/* Dialogs */}
-      <ViewEditDialog data={viewEditDialog} setData={setViewEditDialog} />
+      <ViewDialog data={viewDialog} setData={setViewDialog} />
       <DeleteDialog data={deleteDialog} setData={setDeleteDialog} />
     </div>
   );
@@ -256,7 +284,6 @@ export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
                     setDuration(0);
                     setHighPriority(false);
                     setDueDate(undefined);
-                    toastFn.success("Task added successfully");
                   } else {
                     toastFn.error(result?.message);
                     setIsLoading(false);
@@ -344,6 +371,26 @@ async function addTask(
     duration: duration,
     priority: highPriority ? highestPriority?.priority + 1 : 0,
     due: dueDate,
+  };
+
+  const record = await pb.collection("tasks").create(data);
+
+  if (record) {
+    return {
+      status: "success",
+    };
+  }
+}
+
+async function undoDeleteTask(task: Task) {
+  const data = {
+    userid: pb.authStore.record?.id,
+    title: task.title,
+    description: task.description,
+    status: task.status,
+    duration: task.duration,
+    priority: task.priority,
+    due: task.due,
   };
 
   const record = await pb.collection("tasks").create(data);
