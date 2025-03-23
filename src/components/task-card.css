@@ -1,0 +1,5 @@
+@reference "tailwindcss";
+
+.actions:has(.dropdownbtn[data-state="open"]) {
+  @apply h-9;
+}

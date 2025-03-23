@@ -9,16 +9,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import {
-  CalendarIcon,
-  Edit2,
-  Loader2,
-  Minus,
-  Plus,
-  RefreshCw,
-  Trash,
-  X,
-} from "lucide-react";
+import { Loader2, Minus, Plus, RefreshCw, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -28,8 +19,10 @@ import { useEffect, useState } from "react";
 import { pb } from "@/lib/pocketbase";
 import { toast } from "sonner";
 import { RecordModel } from "pocketbase";
+import TaskCard from "@/components/task-card";
+import { DeleteDialog, ViewEditDialog } from "./todo-dialogs";
 
-interface Task extends RecordModel {
+export interface Task extends RecordModel {
   id: string;
   title: string;
   description: string;
@@ -83,12 +76,32 @@ export default function Todo() {
 }
 
 function TaskList(args: { title: string; tasks: Task[] }) {
+  const [viewEditDialog, setViewEditDialog] = useState<{ open: boolean; task?: Task, mode: "view" | "edit" }>({
+    open: false,
+    mode: "view",
+  });
+
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    task?: Task;
+  }>({
+    open: false,
+  });
+
   return (
     <div className="flex flex-col w-full border p-2 rounded-xs">
       <h1 className="text-center pb-1 border-b">{args.title}</h1>
       <div className="flex flex-col gap-2 pt-2 overflow-y-auto">
         {args.tasks.map((task) => {
-          return <TaskCard key={task.id} task={task} />;
+          return (
+            <TaskCard
+              key={task.id}
+              task={task}
+              openView={() => setViewEditDialog({ open: true, task: task, mode: "view" })}
+              openEdit={() => setViewEditDialog({ open: true, task: task, mode: "edit" })}
+              openDelete={() => setDeleteDialog({ open: true, task: task })}
+            />
+          );
         })}
         {args.title == "Todo" ? (
           <div className="absolute left-0 bottom-0 h-12 w-full"></div>
@@ -96,57 +109,10 @@ function TaskList(args: { title: string; tasks: Task[] }) {
           ""
         )}
       </div>
-    </div>
-  );
-}
 
-function TaskCard(args: { task: Task }) {
-  // Create a date object for today at noon
-  const currentDate = new Date();
-  currentDate.setHours(12, 0, 0, 0);
-
-  const testDate = new Date();
-  testDate.setDate(testDate.getDate() + 3);
-  testDate.setHours(12, 0, 0, 0);
-
-  const dueDate = args.task.due ? new Date(args.task.due) : undefined;
-
-  return (
-    <div className="bg-card flex flex-col p-2 rounded-lg border">
-      <div className="flex items-start justify-between gap-2">
-        <h1>{args.task.title}</h1>
-        <div className="flex">
-          <button className="p-1 hover:bg-accent rounded-sm">
-            <Edit2 size="16" />
-          </button>
-          <button className="p-1 hover:bg-accent rounded-sm text-red-400">
-            <Trash size="16" />
-          </button>
-        </div>
-      </div>
-      <p
-        title={args.task.description}
-        className="text-muted-foreground text-xs line-clamp-2 overflow-hidden text-ellipsis"
-      >
-        {args.task.description}
-      </p>
-      {dueDate ? (
-        <div
-          className={
-            "text-xs flex items-center gap-1" +
-            (currentDate >= dueDate
-              ? " text-red-400"
-              : testDate >= dueDate
-              ? " text-yellow-400"
-              : " text-blue-400")
-          }
-        >
-          <CalendarIcon size="12" />
-          <p> Due {dueDate.toLocaleDateString()}</p>
-        </div>
-      ) : (
-        ""
-      )}
+      {/* Dialogs */}
+      <ViewEditDialog data={viewEditDialog} setData={setViewEditDialog} />
+      <DeleteDialog data={deleteDialog} setData={setDeleteDialog} />
     </div>
   );
 }
