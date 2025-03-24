@@ -291,7 +291,7 @@ export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
                 });
               }}
             >
-              {isLoading ? <Loader2 className="animate-spin" /> : ""}
+              {isLoading && <Loader2 className="animate-spin" />}
               Submit
             </Button>
           </DrawerFooter>
