@@ -61,12 +61,6 @@ export default function Schedule() {
             >
               <h3 className="font-medium">{task.title}</h3>
               <div className="flex gap-2">
-                {task.dueDate && (
-                  <p className="text-sm text-muted-foreground flex gap-1 items-center">
-                    <CalendarIcon size="14" />
-                    Due {new Date(task.dueDate).toLocaleDateString()}
-                  </p>
-                )}
                 {task.duration ? (
                   <p className="text-sm text-muted-foreground flex gap-1 items-center">
                     <Clock size="14" />
@@ -74,6 +68,12 @@ export default function Schedule() {
                   </p>
                 ) : (
                   ""
+                )}
+                {task.dueDate && (
+                  <p className="text-sm text-muted-foreground flex gap-1 items-center">
+                    <CalendarIcon size="14" />
+                    Due {new Date(task.dueDate).toLocaleDateString()}
+                  </p>
                 )}
               </div>
               <p className="text-sm">{task.details}</p>
