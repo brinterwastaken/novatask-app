@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import Schedule from "@/components/schedule";
 import LoadingPage from "@/pages/utils/loading-page";
+import { FlaskConical } from "lucide-react";
 
 interface UserData extends RecordModel {
   id: string;
@@ -71,8 +72,8 @@ export default function Home() {
   } else {
     return (
       <div id="home">
-        <div className="home-container mt-14 md:mx-auto w-full max-w-6xl">
-          <div className="home-content bg-background/60">
+        <div className="home-container my-auto md:mx-auto w-full max-w-6xl">
+          <div className="home-content bg-background/60 mt-14">
             <h1 className="text-3xl">{greet(userData.name)}</h1>
             <div className="gridview">
               <GridSection
@@ -81,8 +82,8 @@ export default function Home() {
               >
                 {time}
               </GridSection>
-              <GridSection name="Weather" className="md:col-span-2 min-h-24">
-                Weather
+              <GridSection name="Weather" className="md:col-span-2 min-h-24 flex justify-center items-center text-muted-foreground">
+                <FlaskConical size="24" /> WIP
               </GridSection>
               <GridSection
                 name=""
