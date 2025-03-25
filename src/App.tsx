@@ -2,9 +2,9 @@ import { pb } from "@/lib/pocketbase";
 import { useEffect, useState } from "react";
 
 import { ThemeProvider } from "@/components/theme-provider";
-import Login from "./pages/login/login";
-import Home from "./pages/home/home";
-import PasswordReset from "./pages/utils/password-reset";
+import Login from "@/pages/loginpage/login";
+import Home from "@/pages/homepage/home";
+import PasswordReset from "@/pages/utils/password-reset";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);

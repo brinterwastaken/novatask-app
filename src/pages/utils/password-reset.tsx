@@ -10,7 +10,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
 import { pb } from "@/lib/pocketbase";
-import { PasswordInput } from "@/pages/login/login";
+import { PasswordInput } from "@/pages/loginpage/login";
 import { useState } from "react";
 import { toast } from "sonner";
 
