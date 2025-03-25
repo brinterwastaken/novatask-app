@@ -132,15 +132,7 @@ async function getSchedule() {
   const response: {
     status: string;
     aiResponse: string;
-  } = await pb.send("/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: {
-      tasks: todotasks.items,
-    },
-  });
+  } = await pb.send("/api/schedule", { method: "GET" });
 
   const aiResponse: {
     note: string;

@@ -74,6 +74,32 @@ function LoginCard({ changeMode }: { changeMode: () => void }) {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          <div
+            className="text-sm text-muted-foreground hover:underline cursor-pointer w-max"
+            title="Wait 30s between attempts"
+            onClick={() => {
+              if (!email) {
+                toast.warning("Please enter your email to reset your password");
+                return;
+              } else {
+                pb.collection("users")
+                  .requestPasswordReset(email)
+                  .then(() => {
+                    toast.success(
+                      <>
+                        <p>
+                          If <b>{email}</b> is associated with an account, a
+                          password reset link has been sent.
+                        </p>
+                        <p>Please check your inbox and spam folder.</p>
+                      </>
+                    );
+                  });
+              }
+            }}
+          >
+            Forgot Password?
+          </div>
         </CardContent>
         <CardFooter>
           <SubmitButton
@@ -178,7 +204,7 @@ function RegisterCard({ changeMode }: { changeMode: () => void }) {
   );
 }
 
-function PasswordInput({ id, ...props }: React.ComponentProps<"input">) {
+export function PasswordInput({ id, ...props }: React.ComponentProps<"input">) {
   const [show, setShow] = useState(false);
   return (
     <>
@@ -248,6 +274,10 @@ async function registerUser(
   }
   if (password !== confpassword) {
     toast.error("Passwords do not match");
+    return;
+  }
+  if (password.length < 8) {
+    toast.error("Password must be at least 8 characters");
     return;
   }
   await pb

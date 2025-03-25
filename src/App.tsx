@@ -2,13 +2,48 @@ import { pb } from "@/lib/pocketbase";
 import { useEffect, useState } from "react";
 
 import { ThemeProvider } from "@/components/theme-provider";
-import Login from "./pages/login/Login";
-import Home from "@/pages/home/Home";
+import Login from "./pages/login/login";
+import Home from "./pages/home/home";
+import PasswordReset from "./pages/utils/password-reset";
 
 function App() {
   const [isAuth, setIsAuth] = useState(false);
+  const [hasUrlParams, setHasUrlParams] = useState(false);
+  const [utilPage, setUtilPage] = useState<
+    "passwordReset" | "verifySuccess" | null
+  >(null);
+  const [passwordPageParams, setPasswordPageParams] = useState<{
+    token?: string;
+    email?: string;
+  }>({});
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.size > 0) {
+      setHasUrlParams(true);
+      if (params.has("passwordReset")) {
+        const resetPasswordToken = params.get("token");
+        if (resetPasswordToken) {
+          setPasswordPageParams((prev) => ({
+            ...prev,
+            token: resetPasswordToken,
+          }));
+        }
+        const resetPasswordEmail = params.get("email");
+        if (resetPasswordEmail) {
+          setPasswordPageParams((prev) => ({
+            ...prev,
+            email: resetPasswordEmail,
+          }));
+        }
+        
+        setUtilPage("passwordReset");
+      }
+    } else {
+      setUtilPage(null);
+    }
+
     setIsAuth(pb.authStore.isValid);
   }, []);
 
@@ -18,7 +53,15 @@ function App() {
 
   return (
     <ThemeProvider>
-      <AuthCheck isAuth={isAuth} />
+      {hasUrlParams ? (
+        utilPage === "passwordReset" ? (
+          <PasswordReset token={passwordPageParams.token} email={passwordPageParams.email} />
+        ) : (
+          <AuthCheck isAuth={isAuth} />
+        )
+      ) : (
+        <AuthCheck isAuth={isAuth} />
+      )}
       <div className="bg-credit text-xs fixed bottom-2 left-3 text-muted-foreground">
         Photo by{" "}
         <a
