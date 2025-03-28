@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import Schedule from "@/components/schedule";
 import LoadingPage from "@/pages/utils/loading-page";
 import { FlaskConical } from "lucide-react";
+import VerificationCard from "@/components/verification-card";
 
 interface UserData extends RecordModel {
   id: string;
@@ -66,57 +67,69 @@ export default function Home() {
   }
 
   if (!userData) {
-    return (
-      <LoadingPage />
-    );
+    return <LoadingPage />;
   } else {
-    return (
-      <div id="home">
-        <div className="home-container my-auto md:mx-auto w-full max-w-6xl">
-          <div className="home-content bg-background/60 mt-14">
-            <h1 className="text-3xl">{greet(userData.name)}</h1>
-            <div className="gridview">
-              <GridSection
-                name="Clock"
-                className="md:col-span-3 row-span-2 min-h-24 text-6xl flex justify-center items-center"
-              >
-                {time}
-              </GridSection>
-              <GridSection name="Weather" className="md:col-span-2 min-h-24 flex justify-center items-center text-muted-foreground">
-                <FlaskConical size="24" /> WIP
-              </GridSection>
-              <GridSection
-                name=""
-                className="md:col-span-4 min-h-24 py-2 px-4 flex flex-col items-center justify-center"
-              >
-                <div className="italic text-sm text-center">{quote[0]}</div>
-                <div className="text-sm self-end mr-[5%]"> - {quote[1]}</div>
-              </GridSection>
-              <GridSection
-                name="Tasks"
-                className="col-span-6 row-span-5 p-4 pt-10 flex flex-col md:flex-row gap-2 w-full md:h-full"
-              >
-                <Todo />
-              </GridSection>
-              <GridSection
-                name="Schedule"
-                className="md:col-span-3 row-span-4 min-h-80"
-                showBorder={true}
-              >
-                <Schedule />
-              </GridSection>
+    if (!userData.verified) {
+      return (
+        <div className="flex justify-center items-center h-screen">
+          <VerificationCard />
+        </div>
+      )
+    } else {
+      return (
+        <div id="home">
+          <div className="home-container my-auto md:mx-auto w-full max-w-6xl">
+            <div className="home-content bg-background/60 mt-14">
+              <h1 className="text-3xl">{greet(userData.name)}</h1>
+              <div className="md:hidden">
+                Mobile UI for Novatask is a work in progress.
+              </div>
+              <div className="gridview">
+                <GridSection
+                  name="Clock"
+                  className="md:col-span-3 row-span-2 min-h-24 text-6xl flex justify-center items-center"
+                >
+                  {time}
+                </GridSection>
+                <GridSection
+                  name="Weather"
+                  className="md:col-span-2 min-h-24 flex justify-center items-center text-muted-foreground"
+                >
+                  <FlaskConical size="24" /> WIP
+                </GridSection>
+                <GridSection
+                  name=""
+                  className="md:col-span-4 min-h-24 py-2 px-4 flex flex-col items-center justify-center"
+                >
+                  <div className="italic text-sm text-center">{quote[0]}</div>
+                  <div className="text-sm self-end mr-[5%]"> - {quote[1]}</div>
+                </GridSection>
+                <GridSection
+                  name="Tasks"
+                  className="col-span-6 row-span-5 p-4 pt-10 flex flex-col md:flex-row gap-2 w-full md:h-full"
+                >
+                  <Todo />
+                </GridSection>
+                <GridSection
+                  name="Schedule"
+                  className="md:col-span-3 row-span-4 min-h-80"
+                  showBorder={true}
+                >
+                  <Schedule />
+                </GridSection>
+              </div>
             </div>
           </div>
+          <CreateTaskDrawer toastFn={toast} />
+          <NavBar
+            name={userData.name}
+            email={userData.email}
+            avatarUrl={`http://127.0.0.1:8090/api/files/_pb_users_auth_/${userData.id}/${userData.avatar}`}
+          />
+          <Toaster position="top-right" offset={{ top: "5rem" }} richColors />
         </div>
-        <CreateTaskDrawer toastFn={toast} />
-        <NavBar
-          name={userData.name}
-          email={userData.email}
-          avatarUrl={`http://127.0.0.1:8090/api/files/_pb_users_auth_/${userData.id}/${userData.avatar}`}
-        />
-        <Toaster position="top-right" offset={{ top: "5rem" }} richColors />
-      </div>
-    );
+      );
+    }
   }
 }
 

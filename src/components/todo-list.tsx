@@ -20,7 +20,8 @@ import { pb } from "@/lib/pocketbase";
 import { toast } from "sonner";
 import { RecordModel } from "pocketbase";
 import TaskCard from "@/components/task-card";
-import { DeleteDialog, ViewDialog } from "./todo-dialogs";
+import { DeleteDialog, EditDialog, ViewDialog } from "./todo-dialogs";
+import { forceNumberInput } from "@/lib/utils";
 
 export interface Task extends RecordModel {
   id: string;
@@ -58,9 +59,6 @@ export default function Todo() {
       (e) => {
         if (e.action == "create") {
           toast.success(`Task created: ${e.record.title}`);
-        }
-        if (e.action == "update") {
-          toast(`Task updated: ${e.record.title}`);
         }
         if (e.action == "delete") {
           toast.warning(`Task deleted: ${e.record.title}`, {
@@ -121,6 +119,9 @@ function TaskList(args: { title: string; tasks: Task[] }) {
     open: false,
   });
 
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDialogTask, setEditDialogTask] = useState<Task>();
+
   return (
     <div className="flex flex-col w-full border p-2 rounded-xs">
       <h1 className="text-center pb-1 border-b">{args.title}</h1>
@@ -131,7 +132,10 @@ function TaskList(args: { title: string; tasks: Task[] }) {
               key={task.id}
               task={task}
               openView={() => setViewDialog({ open: true, task: task })}
-              openEdit={() => {}}
+              openEdit={() => {
+                setEditDialogOpen(true);
+                setEditDialogTask(task);
+              }}
               openDelete={() => setDeleteDialog({ open: true, task: task })}
             />
           );
@@ -140,6 +144,11 @@ function TaskList(args: { title: string; tasks: Task[] }) {
 
       {/* Dialogs */}
       <ViewDialog data={viewDialog} setData={setViewDialog} />
+      <EditDialog
+        open={editDialogOpen}
+        task={editDialogTask}
+        setOpen={setEditDialogOpen}
+      />
       <DeleteDialog data={deleteDialog} setData={setDeleteDialog} />
     </div>
   );
@@ -188,6 +197,7 @@ export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
                 id="tasktitle"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                required
               />
               <br />
               <Label htmlFor="taskdesc">Description</Label>
@@ -207,11 +217,11 @@ export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  placeholder="45"
+                  placeholder="Set estimated duration"
                   id="duration"
                   value={duration != 0 ? duration : ""}
                   onChange={(e) =>
-                    handleDurationChange(e.target.value, setDuration)
+                    forceNumberInput(e.target.value, setDuration)
                   }
                 />
                 <div className="text-sm absolute right-26">Minutes</div>
@@ -299,18 +309,6 @@ export function CreateTaskDrawer({ toastFn }: { toastFn: typeof toast }) {
       </DrawerContent>
     </Drawer>
   );
-}
-
-function handleDurationChange(
-  value: string,
-  setDuration: (duration: number) => void
-) {
-  const duration = parseInt(value);
-  if (isNaN(duration)) {
-    setDuration(0);
-  } else {
-    setDuration(duration);
-  }
 }
 
 async function getTaskList() {

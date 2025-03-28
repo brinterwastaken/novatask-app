@@ -4,6 +4,9 @@ import { LogOut, User } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
+import lightIcon from "@/assets/icon-light.png";
+import darkIcon from "@/assets/icon-dark.png";
+
 export default function NavBar(info: {
   avatarUrl: string;
   name: string;
@@ -20,6 +23,8 @@ export default function NavBar(info: {
 function Left() {
   return (
     <div className="flex gap-2 items-center">
+      <img src={lightIcon} alt="" className="block dark:hidden w-10"/>
+      <img src={darkIcon} alt="" className="hidden dark:block w-10"/>
       <div className="text-xl">Dashboard</div>
     </div>
   );
