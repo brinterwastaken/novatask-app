@@ -8,6 +8,8 @@ import {
 } from "./ui/card";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import { LogOut } from "lucide-react";
+import { pb } from "@/lib/pocketbase";
 
 export default function VerificationCard() {
   const [showCopied, setShowCopied] = useState(false);
@@ -28,9 +30,16 @@ export default function VerificationCard() {
           </p>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex gap-2 justify-end">
         <Button
-          className="ml-auto relative"
+          variant="secondary"
+          onClick={() => pb.authStore.clear()}
+        >
+          <LogOut />
+          Logout
+        </Button>
+        <Button
+          className="relative"
           onClick={() => {
             navigator.clipboard.writeText("username._.brinter");
             setShowCopied(true);
@@ -41,9 +50,14 @@ export default function VerificationCard() {
         >
           <DiscordIcon />
           Request Access
-            <div className={"absolute bg-blue-400 px-2 py-1 transition-all rounded-md pointer-events-none" + (showCopied ? " -translate-y-9" : "  scale-90 opacity-0")}>
-              Copied Discord username ._.brinter to clipboard
-            </div>
+          <div
+            className={
+              "absolute bg-blue-400 px-2 py-1 transition-all rounded-md pointer-events-none" +
+              (showCopied ? " -translate-y-9" : "  scale-90 opacity-0")
+            }
+          >
+            Copied Discord username ._.brinter to clipboard
+          </div>
         </Button>
       </CardFooter>
     </Card>

@@ -5,8 +5,13 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Login from "@/pages/loginpage/login";
 import Home from "@/pages/homepage/home";
 import PasswordReset from "@/pages/utils/password-reset";
+import LoadingPage from "./pages/utils/loading-page";
+import BackendOffline from "./pages/utils/backend-offline";
 
 function App() {
+  const [backendStatus, setBackendStatus] = useState<
+    "online" | "offline" | "unknown"
+  >("unknown");
   const [isAuth, setIsAuth] = useState(false);
   const [hasUrlParams, setHasUrlParams] = useState(false);
   const [utilPage, setUtilPage] = useState<
@@ -18,6 +23,20 @@ function App() {
   }>({});
 
   useEffect(() => {
+    pb.send("/api/health", {
+      method: "GET",
+    })
+      .then((res) => {
+        if (res.code === 200) {
+          setBackendStatus("online");
+        } else {
+          setBackendStatus("offline");
+        }
+      })
+      .catch(() => {
+        setBackendStatus("offline");
+      });
+
     const params = new URLSearchParams(window.location.search);
 
     if (params.size > 0) {
@@ -37,7 +56,7 @@ function App() {
             email: resetPasswordEmail,
           }));
         }
-        
+
         setUtilPage("passwordReset");
       }
     } else {
@@ -53,31 +72,38 @@ function App() {
 
   return (
     <ThemeProvider>
-      {hasUrlParams ? (
-        utilPage === "passwordReset" ? (
-          <PasswordReset token={passwordPageParams.token} email={passwordPageParams.email} />
+      {backendStatus === "offline" ? (
+        <BackendOffline />
+      ) : backendStatus === "online" ? (
+        hasUrlParams && utilPage === "passwordReset" ? (
+          <PasswordReset
+            token={passwordPageParams.token}
+            email={passwordPageParams.email}
+          />
         ) : (
-          <AuthCheck isAuth={isAuth} />
+          <>
+            <AuthCheck isAuth={isAuth} />
+            <div className="bg-credit text-xs fixed bottom-2 left-3 text-muted-foreground">
+              Photo by{" "}
+              <a
+                className="underline"
+                href="https://unsplash.com/@anik3t?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
+              >
+                Aniket Deole
+              </a>{" "}
+              on{" "}
+              <a
+                className="underline"
+                href="https://unsplash.com/photos/photo-of-valley-M6XC789HLe8?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
+              >
+                Unsplash
+              </a>
+            </div>{" "}
+          </>
         )
       ) : (
-        <AuthCheck isAuth={isAuth} />
+        <LoadingPage />
       )}
-      <div className="bg-credit text-xs fixed bottom-2 left-3 text-muted-foreground">
-        Photo by{" "}
-        <a
-          className="underline"
-          href="https://unsplash.com/@anik3t?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
-        >
-          Aniket Deole
-        </a>{" "}
-        on{" "}
-        <a
-          className="underline"
-          href="https://unsplash.com/photos/photo-of-valley-M6XC789HLe8?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
-        >
-          Unsplash
-        </a>
-      </div>
     </ThemeProvider>
   );
 }
