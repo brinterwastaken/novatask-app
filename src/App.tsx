@@ -23,14 +23,6 @@ function App() {
   }>({});
 
   useEffect(() => {
-    pb.beforeSend = function (url, options) {
-      options.headers = {
-        ...options.headers,
-        "ngrok-skip-browser-warning": "1",
-      };
-      return { url, options };
-    };
-
     pb.send("/api/health", {
       method: "GET",
     })
